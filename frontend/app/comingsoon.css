@@ -1,0 +1,24 @@
+.shine-text {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  background: linear-gradient(
+    120deg,
+    #444 0%,
+    #888 40%,
+    #444 80%
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 2s infinite linear;
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% 200%;
+  }
+  100% {
+    background-position: 200% -200%;
+  }
+}

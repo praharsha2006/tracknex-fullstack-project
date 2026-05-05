@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>WebSocket Test</h1>
+    <button onclick="sendLocation()">Send Location Update</button>
+
+    <script>
+      const socket = io('http://localhost:5000');
+
+      socket.on('connect', () => {
+        console.log('Connected:', socket.id);
+      });
+
+      function sendLocation() {
+        const data = {
+          tripId: 'TRIP20240609',
+          driverId: 'driverUserIdHere',
+          location: {
+            lat: 28.61 + Math.random() * 0.01,
+            lng: 77.20 + Math.random() * 0.01
+          },
+          timestamp: new Date()
+        };
+        // Example location update send
+        socket.emit('locationUpdate', {
+        tripId: 'TRIP1001',
+        currentLocation: { lat: 28.6139, lng: 77.209 }
+        });
+        console.log('Sent:', data);
+      }
+
+      socket.on('locationUpdate', (data) => {
+        console.log('Broadcast received:', data);
+      });
+    </script>
+  </body>
+</html>

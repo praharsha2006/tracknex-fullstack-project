@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ml-model-api
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: cd ml_model && pip install -r requirements.txt
+    startCommand: cd ml_model && uvicorn ml_api:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PORT
+        value: 10000

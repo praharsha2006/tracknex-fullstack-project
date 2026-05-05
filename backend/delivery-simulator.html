@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Delivery Simulator</title>
+</head>
+<body>
+  <h1>Delivery Client Simulator</h1>
+  <button id="start">Start Sending Location</button>
+  <button id="stop" disabled>Stop Sending</button>
+  <div id="log"></div>
+
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <script>
+    const socket = io('http://localhost:5000'); // Change URL if needed
+    const logDiv = document.getElementById('log');
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+
+    let intervalId = null;
+
+    function log(msg) {
+      const p = document.createElement('p');
+      p.textContent = msg;
+      logDiv.appendChild(p);
+      console.log(msg);
+    }
+
+    // Simulate location changes by slightly changing lat/lng
+    let lat = 28.6139;
+    let lng = 77.209;
+
+    startBtn.onclick = () => {
+      if (intervalId) return;
+      log('Starting location updates...');
+      intervalId = setInterval(() => {
+        // Random small change
+        lat += (Math.random() - 0.5) * 0.001;
+        lng += (Math.random() - 0.5) * 0.001;
+
+        const locationData = {
+          tripId: 'TRIP1001', // use your actual tripId here
+          driverId: '68459133d6495e75473b00b8', // replace with actual delivery user id or some identifier
+          lat: lat.toFixed(6),
+          lng: lng.toFixed(6),
+          timestamp: new Date().toISOString()
+        };
+
+        socket.emit('locationUpdate', locationData);
+        log(`Sent location: ${locationData.lat}, ${locationData.lng}`);
+      }, 3000); // send every 3 seconds
+
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    stopBtn.onclick = () => {
+      clearInterval(intervalId);
+      intervalId = null;
+      log('Stopped location updates');
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>

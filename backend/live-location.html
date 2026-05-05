@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Delivery Location</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #status { margin-bottom: 20px; color: green; }
+    #status.error { color: red; }
+    #location { font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>Live Delivery Location Updates</h1>
+  <div id="status">Connecting to server...</div>
+  <div id="location">No location updates yet.</div>
+
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"
+    integrity="sha384-SbklEQ9+wlyc5nDKmjz6Qk2jQFQbsqN0XTbihW/wW8eDNZ0JpYrQvjRYs2vEGB/S"
+    crossorigin="anonymous"></script>
+  <script>
+    const statusDiv = document.getElementById('status');
+    const locationDiv = document.getElementById('location');
+
+    const socket = io('http://localhost:5000', {
+      reconnectionAttempts: 5,
+      timeout: 5000,
+    });
+
+    socket.on('connect', () => {
+      statusDiv.textContent = 'Connected to server (socket ID: ' + socket.id + ')';
+      statusDiv.classList.remove('error');
+      console.log('Socket connected:', socket.id);
+    });
+
+    socket.on('disconnect', (reason) => {
+      statusDiv.textContent = 'Disconnected from server. Reason: ' + reason;
+      statusDiv.classList.add('error');
+      console.warn('Socket disconnected:', reason);
+    });
+
+    socket.on('connect_error', (error) => {
+      statusDiv.textContent = 'Connection error: ' + error.message;
+      statusDiv.classList.add('error');
+      console.error('Connection error:', error);
+    });
+
+    socket.on('locationUpdate', (data) => {
+      console.log('Location update received:', data);
+      if (!data) return;
+
+      const tripId = data.tripId || data._id || 'Unknown Trip';
+      let lat, lng;
+
+      // Handle nested location data
+      if (data.currentLocation) {
+        lat = data.currentLocation.lat;
+        lng = data.currentLocation.lng;
+      } else {
+        lat = data.lat;
+        lng = data.lng;
+      }
+
+      if (lat !== undefined && lng !== undefined) {
+        locationDiv.textContent = `Trip ID: ${tripId} | Lat: ${lat}, Lng: ${lng}`;
+      } else {
+        locationDiv.textContent = `Trip ID: ${tripId} | Location data not available`;
+      }
+    });
+  </script>
+</body>
+</html>
